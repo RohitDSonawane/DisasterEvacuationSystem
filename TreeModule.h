@@ -12,6 +12,8 @@ private:
     // Helpers
     void deleteTree(TreeNode* node);
     TreeNode* findRecursive(TreeNode* current, const std::string& name) const;
+    int aggregateRecursive(TreeNode* node);
+    void collectReliefCenters(TreeNode* node, std::vector<TreeNode*>& centers) const;
 
 public:
     TreeModule();

@@ -59,15 +59,51 @@ TreeNode* TreeModule::searchNode(const std::string& name) const {
     return findRecursive(root, name);
 }
 
+int TreeModule::aggregateRecursive(TreeNode* node) {
+    if (!node) return 0;
+    
+    // Sum population from children
+    int total = node->affectedPeople; // Start with the node's own localized population
+    for (TreeNode* child : node->children) {
+        total += aggregateRecursive(child);
+    }
+    
+    node->affectedPeople = total; // Update node's population with aggregate
+    return total;
+}
+
+void TreeModule::collectReliefCenters(TreeNode* node, std::vector<TreeNode*>& centers) const {
+    if (!node) return;
+    if (node->type == Constants::TYPE_RELIEFCENTER) {
+        centers.push_back(node);
+    }
+    for (TreeNode* child : node->children) {
+        collectReliefCenters(child, centers);
+    }
+}
+
 void TreeModule::aggregatePopulation() {
-    // Stub
+    aggregateRecursive(root);
 }
 
 void TreeModule::listReliefCenters(const std::string& regionName) const {
-    // Stub
+    TreeNode* region = searchNode(regionName);
+    if (!region) {
+        std::cerr << "Region not found: " << regionName << std::endl;
+        return;
+    }
+
+    std::vector<TreeNode*> centers;
+    collectReliefCenters(region, centers);
+
+    std::cout << "Relief Centers in " << regionName << ":" << std::endl;
+    for (TreeNode* center : centers) {
+        std::cout << " - " << center->name << " (Capacity: " << center->capacity << ")" << std::endl;
+    }
 }
 
 std::vector<TreeNode*> TreeModule::getAllReliefCenters() const {
-    // Stub
-    return {};
+    std::vector<TreeNode*> centers;
+    collectReliefCenters(root, centers);
+    return centers;
 }

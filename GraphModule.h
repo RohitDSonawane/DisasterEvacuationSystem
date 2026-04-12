@@ -3,12 +3,13 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <map>
 
 class GraphModule {
 private:
-    std::map<std::string, std::vector<std::pair<std::string, int>>> adjList;
-    std::map<std::string, std::string> parentMap;
+    std::unordered_map<std::string, std::vector<std::pair<std::string, int>>> adjList;
+    std::unordered_map<std::string, std::string> parentMap;
 
 public:
     bool addEdge(const std::string& node1, const std::string& node2, int weight);
