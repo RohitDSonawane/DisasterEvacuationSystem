@@ -9,8 +9,9 @@ class TreeModule {
 private:
     TreeNode* root;
 
-    // Helper for recursion if needed
+    // Helpers
     void deleteTree(TreeNode* node);
+    TreeNode* findRecursive(TreeNode* current, const std::string& name) const;
 
 public:
     TreeModule();
