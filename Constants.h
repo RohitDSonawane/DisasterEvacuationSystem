@@ -5,20 +5,20 @@
 
 // System-wide constants
 namespace Constants {
-    const int INF = 1e9; // Infinity value for unreachable distance
+    const int INFINITY_DIST = 1e9; // Infinity value for unreachable distance
 
     // Entity Types
-    const std::string STATE = "STATE";
-    const std::string DISTRICT = "DISTRICT";
-    const std::string CITY = "CITY";
-    const std::string ZONE = "ZONE";
-    const std::string RELIEFCENTER = "RELIEFCENTER";
+    const std::string TYPE_STATE = "STATE";
+    const std::string TYPE_DISTRICT = "DISTRICT";
+    const std::string TYPE_CITY = "CITY";
+    const std::string TYPE_ZONE = "ZONE";
+    const std::string TYPE_RELIEFCENTER = "RELIEFCENTER";
 
     // Keywords for Parsing
-    const std::string ENTITY = "ENTITY";
-    const std::string ROAD = "ROAD";
-    const std::string AFFECTED = "AFFECTED";
-    const std::string EVACUATE = "EVACUATE";
+    const std::string KW_ENTITY = "ENTITY";
+    const std::string KW_ROAD = "ROAD";
+    const std::string KW_AFFECTED = "AFFECTED";
+    const std::string KW_EVACUATE = "EVACUATE";
 
     // Exit Codes
     enum ExitCode {
