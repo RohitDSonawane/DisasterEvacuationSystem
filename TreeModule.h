@@ -14,6 +14,7 @@ private:
     TreeNode* findRecursive(TreeNode* current, const std::string& name) const;
     int aggregateRecursive(TreeNode* node);
     void collectReliefCenters(TreeNode* node, std::vector<TreeNode*>& centers) const;
+    void printSummaryRecursive(TreeNode* node) const;
 
 public:
     TreeModule();
@@ -24,6 +25,7 @@ public:
     void aggregatePopulation();
     void listReliefCenters(const std::string& regionName) const;
     std::vector<TreeNode*> getAllReliefCenters() const;
+    void printSummary() const;
 };
 
 #endif // TREEMODULE_H

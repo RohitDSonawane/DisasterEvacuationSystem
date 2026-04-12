@@ -21,5 +21,8 @@ int main(int argc, char* argv[]) {
         return Constants::ExitCode::FILE_ERROR;
     }
 
+    // Final Reporting
+    tree.printSummary();
+
     return Constants::ExitCode::SUCCESS;
 }

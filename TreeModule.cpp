@@ -107,3 +107,21 @@ std::vector<TreeNode*> TreeModule::getAllReliefCenters() const {
     collectReliefCenters(root, centers);
     return centers;
 }
+
+void TreeModule::printSummaryRecursive(TreeNode* node) const {
+    if (!node) return;
+    
+    if (node->affectedPeople > 0) {
+        std::cout << node->name << " (" << node->type << ") - Affected: " << node->affectedPeople << std::endl;
+    }
+
+    for (TreeNode* child : node->children) {
+        printSummaryRecursive(child);
+    }
+}
+
+void TreeModule::printSummary() const {
+    std::cout << "--- Administrative Affected Summary ---" << std::endl;
+    printSummaryRecursive(root);
+    std::cout << "---------------------------------------" << std::endl;
+}
