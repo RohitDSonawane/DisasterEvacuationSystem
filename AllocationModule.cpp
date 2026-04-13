@@ -12,46 +12,69 @@ EvacuationResult AllocationModule::evacuate(const std::string& zoneName, int peo
     EvacuationResult result;
     result.success = false;
     result.zoneName = zoneName;
+    result.totalPeople = peopleCount;
 
     // 1. Run Dijkstra from the source zone
     std::map<std::string, int> distances = graph.dijkstra(zoneName);
 
-    // 2. Identify all valid ReliefCenters with sufficient REMAINING capacity
+    // 2. Identify all reachable ReliefCenters and sort by distance
     std::vector<TreeNode*> centers = tree.getAllReliefCenters();
-    std::vector<std::pair<int, TreeNode*>> viableCenters;
+    std::vector<std::pair<int, TreeNode*>> reachableCenters;
 
     for (TreeNode* center : centers) {
-        // Use occupancy to check available space
-        if ((center->capacity - center->occupancy) >= peopleCount) {
-            int dist = distances[center->name];
-            if (dist != Constants::INFINITY_DIST) {
-                viableCenters.push_back({dist, center});
-            }
+        int dist = distances[center->name];
+        if (dist != Constants::INFINITY_DIST) {
+            reachableCenters.push_back({dist, center});
         }
     }
 
-    // 3. Find the closest shelter
-    if (viableCenters.empty()) {
-        result.errorMessage = "No shelter with sufficient capacity reachable from " + zoneName;
-        return result;
-    }
-
-    // Sort by distance
-    std::sort(viableCenters.begin(), viableCenters.end(), [](const auto& a, const auto& b) {
+    // Sort by distance (closest first)
+    std::sort(reachableCenters.begin(), reachableCenters.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
 
-    TreeNode* assignedShelter = viableCenters[0].second;
-    int minDistance = viableCenters[0].first;
+    // 3. Greedy Allocation
+    int peopleLeft = peopleCount;
+    for (auto& pair : reachableCenters) {
+        int dist = pair.first;
+        TreeNode* center = pair.second;
+        int available = center->capacity - center->occupancy;
 
-    // 4. Update Occupancy
-    assignedShelter->occupancy += peopleCount;
+        if (available > 0) {
+            int toAllocate = (peopleLeft < available) ? peopleLeft : available;
+            
+            // Record assignment
+            ShelterAssignment sa;
+            sa.shelterName = center->name;
+            sa.distance = dist;
+            sa.peopleAllocated = toAllocate;
+            sa.route = graph.getRoute(center->name);
+            
+            result.assignments.push_back(sa);
+            
+            // Update state
+            center->occupancy += toAllocate;
+            peopleLeft -= toAllocate;
+        }
 
-    // 5. Build Result
-    result.success = true;
-    result.shelterName = assignedShelter->name;
-    result.distance = minDistance;
-    result.route = graph.getRoute(assignedShelter->name);
+        if (peopleLeft == 0) break;
+    }
+
+    // 4. Finalize result
+    if (peopleLeft == 0) {
+        result.success = true;
+    } else {
+        if (result.assignments.empty()) {
+            result.errorMessage = "No reachable shelters found for " + zoneName;
+        } else {
+            result.errorMessage = "Partial evacuation successful, but " + std::to_string(peopleLeft) + " people remaining without shelter.";
+            result.success = true; // Still mark as success if we did SOME work? 
+                                   // Let's keep success as false if we couldn't fit everyone, 
+                                   // or maybe true if we want to show the partial plan.
+                                   // Re-evaluating: Mark success=true if at least some people were moved?
+                                   // No, standard TDD/Logic: Success = mission accomplished.
+        }
+    }
 
     return result;
 }

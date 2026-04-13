@@ -18,6 +18,7 @@ public:
     bool loadAdmin(const std::string& filepath);
     bool loadGraph(const std::string& filepath);
     bool loadDisaster(const std::string& filepath);
+    void runInteractive();
     void printEvacuationPlan(const EvacuationResult& result);
     void printShelterSummary() const;
     void printError(const std::string& message);

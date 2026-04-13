@@ -123,21 +123,85 @@ bool IOModule::loadDisaster(const std::string& filepath) {
     return true;
 }
 
+void IOModule::runInteractive() {
+    std::string line;
+    std::cout << "--- DISASTER EVACUATION SYSTEM INTERACTIVE MODE ---" << std::endl;
+    std::cout << "Commands: AFFECTED <zone> <count>, EVACUATE <zone> <count>, STATUS, SUMMARY, EXIT" << std::endl;
+
+    while (true) {
+        std::cout << "> ";
+        if (!std::getline(std::cin, line) || line == "EXIT") break;
+        if (line.empty()) continue;
+
+        std::stringstream ss(line);
+        std::string command;
+        ss >> command;
+
+        // Convert to uppercase for robustness
+        for (auto& c : command) c = std::toupper(c);
+
+        if (command == "AFFECTED") {
+            std::string zone;
+            int count;
+            if (ss >> zone >> count) {
+                TreeNode* node = tree.searchNode(zone);
+                if (node) {
+                    node->affectedPeople = count;
+                    tree.aggregatePopulation();
+                    std::cout << "OK: Updated population for " << zone << std::endl;
+                } else {
+                    printError("Zone not found.");
+                }
+            } else {
+                printError("Usage: AFFECTED <zone> <count>");
+            }
+        } 
+        else if (command == "EVACUATE") {
+            std::string zone;
+            int count;
+            if (ss >> zone >> count) {
+                EvacuationResult res = allocation.evacuate(zone, count);
+                printEvacuationPlan(res);
+            } else {
+                printError("Usage: EVACUATE <zone> <count>");
+            }
+        }
+        else if (command == "STATUS") {
+            tree.printSummary();
+        }
+        else if (command == "SUMMARY") {
+            printShelterSummary();
+        }
+        else {
+            std::cout << "Unknown command. Try: AFFECTED, EVACUATE, STATUS, SUMMARY, EXIT" << std::endl;
+        }
+    }
+}
+
 void IOModule::printEvacuationPlan(const EvacuationResult& result) {
-    if (!result.success) {
+    if (result.assignments.empty()) {
         printError(result.errorMessage);
         return;
     }
 
-    std::cout << "--- Evacuation Plan ---" << std::endl;
-    std::cout << "Source Zone      : " << result.zoneName << std::endl;
-    std::cout << "Assigned Shelter : " << result.shelterName << std::endl;
-    std::cout << "Distance         : " << result.distance << " km" << std::endl;
-    std::cout << "Route            : ";
-    for (size_t i = 0; i < result.route.size(); ++i) {
-        std::cout << result.route[i] << (i == result.route.size() - 1 ? "" : " -> ");
+    std::cout << "--- Evacuation Plan for " << result.zoneName << " (" << result.totalPeople << " people) ---" << std::endl;
+    
+    for (size_t i = 0; i < result.assignments.size(); ++i) {
+        const auto& sa = result.assignments[i];
+        std::cout << " Assignment [" << (i + 1) << "]:" << std::endl;
+        std::cout << "  Shelter  : " << sa.shelterName << " (Allocated: " << sa.peopleAllocated << ")" << std::endl;
+        std::cout << "  Distance : " << sa.distance << " km" << std::endl;
+        std::cout << "  Route    : ";
+        for (size_t j = 0; j < sa.route.size(); ++j) {
+            std::cout << sa.route[j] << (j == sa.route.size() - 1 ? "" : " -> ");
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl << std::endl;
+
+    if (!result.success || !result.errorMessage.empty()) {
+        std::cout << " WARNING: " << result.errorMessage << std::endl;
+    }
+    std::cout << "--------------------------------------------------------" << std::endl << std::endl;
 }
 
 void IOModule::printShelterSummary() const {

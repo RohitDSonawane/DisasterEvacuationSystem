@@ -5,12 +5,18 @@
 #include "GraphModule.h"
 #include <string>
 
-struct EvacuationResult {
-    bool success;
-    std::string zoneName;
+struct ShelterAssignment {
     std::string shelterName;
     int distance;
     std::vector<std::string> route;
+    int peopleAllocated;
+};
+
+struct EvacuationResult {
+    bool success;
+    std::string zoneName;
+    int totalPeople;
+    std::vector<ShelterAssignment> assignments;
     std::string errorMessage;
 };
 

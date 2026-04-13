@@ -6,8 +6,8 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " admin.txt graph.txt disaster.txt" << std::endl;
+    if (argc < 3 || argc > 4) {
+        std::cerr << "Usage: " << argv[0] << " admin.txt graph.txt [disaster.txt]" << std::endl;
         return Constants::ExitCode::BAD_ARGS;
     }
 
@@ -16,14 +16,24 @@ int main(int argc, char* argv[]) {
     AllocationModule allocation(tree, graph);
     IOModule io(tree, graph, allocation);
 
-    if (!io.loadAdmin(argv[1]) || !io.loadGraph(argv[2]) || !io.loadDisaster(argv[3])) {
-        // Errors are printed inside IOModule
+    // Mandatories
+    if (!io.loadAdmin(argv[1]) || !io.loadGraph(argv[2])) {
         return Constants::ExitCode::FILE_ERROR;
     }
 
-    // Final Reporting
+    // Optional Disaster File
+    if (argc == 4) {
+        if (!io.loadDisaster(argv[3])) {
+            return Constants::ExitCode::FILE_ERROR;
+        }
+    }
+
+    // Initial Summaries
     tree.printSummary();
     io.printShelterSummary();
+
+    // Enter Interactive Mode
+    io.runInteractive();
 
     return Constants::ExitCode::SUCCESS;
 }
