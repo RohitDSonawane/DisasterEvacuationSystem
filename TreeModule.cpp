@@ -62,14 +62,20 @@ TreeNode* TreeModule::searchNode(const std::string& name) const {
 int TreeModule::aggregateRecursive(TreeNode* node) {
     if (!node) return 0;
     
-    // Sum population from children
-    int total = node->affectedPeople; // Start with the node's own localized population
-    for (TreeNode* child : node->children) {
-        total += aggregateRecursive(child);
+    // If the node has children, its population is the sum of its children.
+    // Otherwise (leaf node), it maintains its own assigned population count.
+    if (node->type == Constants::TYPE_STATE || 
+        node->type == Constants::TYPE_DISTRICT || 
+        node->type == Constants::TYPE_CITY) {
+        
+        int sum = 0;
+        for (TreeNode* child : node->children) {
+            sum += aggregateRecursive(child);
+        }
+        node->affectedPeople = sum;
     }
     
-    node->affectedPeople = total; // Update node's population with aggregate
-    return total;
+    return node->affectedPeople;
 }
 
 void TreeModule::collectReliefCenters(TreeNode* node, std::vector<TreeNode*>& centers) const {

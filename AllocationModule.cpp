@@ -8,16 +8,21 @@
 
 AllocationModule::AllocationModule(TreeModule& t, GraphModule& g) : tree(t), graph(g) {}
 
-bool AllocationModule::evacuate(const std::string& zoneName, int peopleCount) {
+EvacuationResult AllocationModule::evacuate(const std::string& zoneName, int peopleCount) {
+    EvacuationResult result;
+    result.success = false;
+    result.zoneName = zoneName;
+
     // 1. Run Dijkstra from the source zone
     std::map<std::string, int> distances = graph.dijkstra(zoneName);
 
-    // 2. Identify all valid ReliefCenters with sufficient capacity
+    // 2. Identify all valid ReliefCenters with sufficient REMAINING capacity
     std::vector<TreeNode*> centers = tree.getAllReliefCenters();
     std::vector<std::pair<int, TreeNode*>> viableCenters;
 
     for (TreeNode* center : centers) {
-        if (center->capacity >= peopleCount) {
+        // Use occupancy to check available space
+        if ((center->capacity - center->occupancy) >= peopleCount) {
             int dist = distances[center->name];
             if (dist != Constants::INFINITY_DIST) {
                 viableCenters.push_back({dist, center});
@@ -27,11 +32,11 @@ bool AllocationModule::evacuate(const std::string& zoneName, int peopleCount) {
 
     // 3. Find the closest shelter
     if (viableCenters.empty()) {
-        std::cerr << "ERROR: No shelter with sufficient capacity reachable from " << zoneName << std::endl;
-        return false;
+        result.errorMessage = "No shelter with sufficient capacity reachable from " + zoneName;
+        return result;
     }
 
-    // Sort by distance (first element of pair)
+    // Sort by distance
     std::sort(viableCenters.begin(), viableCenters.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
@@ -39,23 +44,14 @@ bool AllocationModule::evacuate(const std::string& zoneName, int peopleCount) {
     TreeNode* assignedShelter = viableCenters[0].second;
     int minDistance = viableCenters[0].first;
 
-    // 4. Get the full route
-    std::vector<std::string> route = graph.getRoute(assignedShelter->name);
+    // 4. Update Occupancy
+    assignedShelter->occupancy += peopleCount;
 
-    // 5. Output the result
-    std::cout << "Evacuation Plan:" << std::endl;
-    std::cout << "Source Zone      : " << zoneName << std::endl;
-    std::cout << "Assigned Shelter : " << assignedShelter->name << std::endl;
-    std::cout << "Distance         : " << minDistance << " km" << std::endl;
-    std::cout << "Route            : ";
-    for (size_t i = 0; i < route.size(); ++i) {
-        std::cout << route[i] << (i == route.size() - 1 ? "" : " -> "); 
-    }
-    std::cout << std::endl << std::endl;
+    // 5. Build Result
+    result.success = true;
+    result.shelterName = assignedShelter->name;
+    result.distance = minDistance;
+    result.route = graph.getRoute(assignedShelter->name);
 
-    // Optional: Deduct capacity if required (PRD doesn't explicitly say to update state after allocation,
-    // but typically capacity should decrease. However, PRD says "populations are processed individually, not split up").
-    // I'll leave capacity as is unless instructed otherwise.
-    
-    return true;
+    return result;
 }

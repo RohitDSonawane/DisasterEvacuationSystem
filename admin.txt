@@ -1,0 +1,8 @@
+# type name parentName [capacity]
+ENTITY  STATE         Maharashtra       NULL
+ENTITY  DISTRICT      Pune_District     Maharashtra
+ENTITY  CITY          Pune_City         Pune_District
+ENTITY  ZONE          Zone_A            Pune_City
+ENTITY  ZONE          Zone_B            Pune_City
+ENTITY  RELIEFCENTER  Shelter_1         Zone_A   500
+ENTITY  RELIEFCENTER  Shelter_2         Zone_B   300

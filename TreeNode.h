@@ -9,6 +9,7 @@ struct TreeNode {
     std::string type;
     int affectedPeople;
     int capacity;
+    int occupancy;
     std::vector<TreeNode*> children;
     TreeNode* parent;
 

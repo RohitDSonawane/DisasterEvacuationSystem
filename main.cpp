@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
 
     // Final Reporting
     tree.printSummary();
+    io.printShelterSummary();
 
     return Constants::ExitCode::SUCCESS;
 }

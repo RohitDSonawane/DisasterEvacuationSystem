@@ -5,6 +5,15 @@
 #include "GraphModule.h"
 #include <string>
 
+struct EvacuationResult {
+    bool success;
+    std::string zoneName;
+    std::string shelterName;
+    int distance;
+    std::vector<std::string> route;
+    std::string errorMessage;
+};
+
 class AllocationModule {
 private:
     TreeModule& tree;
@@ -12,7 +21,7 @@ private:
 
 public:
     AllocationModule(TreeModule& t, GraphModule& g);
-    bool evacuate(const std::string& zoneName, int peopleCount);
+    EvacuationResult evacuate(const std::string& zoneName, int peopleCount);
 };
 
 #endif // ALLOCATIONMODULE_H

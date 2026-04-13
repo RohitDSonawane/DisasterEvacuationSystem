@@ -103,7 +103,6 @@ bool IOModule::loadDisaster(const std::string& filepath) {
             TreeNode* node = tree.searchNode(zoneName);
             if (node) {
                 node->affectedPeople = count;
-                tree.aggregatePopulation(); // Re-calculate tree metrics
             } else {
                 printError("AFFECTED zone not found: " + zoneName);
             }
@@ -114,18 +113,49 @@ bool IOModule::loadDisaster(const std::string& filepath) {
                 continue;
             }
 
-            if (!allocation.evacuate(zoneName, count)) {
-                // Error message is handled within AllocationModule or by the return status
-            }
+            EvacuationResult res = allocation.evacuate(zoneName, count);
+            printEvacuationPlan(res);
         }
     }
 
+    tree.aggregatePopulation();
     file.close();
     return true;
 }
 
-void IOModule::printEvacuationPlan(const std::string& zoneName, const std::string& shelterName, int distance, const std::vector<std::string>& route) {
-    // Stub
+void IOModule::printEvacuationPlan(const EvacuationResult& result) {
+    if (!result.success) {
+        printError(result.errorMessage);
+        return;
+    }
+
+    std::cout << "--- Evacuation Plan ---" << std::endl;
+    std::cout << "Source Zone      : " << result.zoneName << std::endl;
+    std::cout << "Assigned Shelter : " << result.shelterName << std::endl;
+    std::cout << "Distance         : " << result.distance << " km" << std::endl;
+    std::cout << "Route            : ";
+    for (size_t i = 0; i < result.route.size(); ++i) {
+        std::cout << result.route[i] << (i == result.route.size() - 1 ? "" : " -> ");
+    }
+    std::cout << std::endl << std::endl;
+}
+
+void IOModule::printShelterSummary() const {
+    std::vector<TreeNode*> centers = tree.getAllReliefCenters();
+    
+    std::cout << "=== RELIEF CENTER STATUS SUMMARY ===" << std::endl;
+    std::cout << "Name\t\tOccupancy\tCapacity\tStatus" << std::endl;
+    std::cout << "--------------------------------------------------------" << std::endl;
+    
+    for (TreeNode* center : centers) {
+        double occupancyRate = (center->capacity > 0) ? (double)center->occupancy / center->capacity * 100.0 : 0;
+        std::cout << center->name << "\t" << center->occupancy << "\t\t" << center->capacity << "\t\t";
+        if (occupancyRate >= 100.0) std::cout << "[FULL]";
+        else if (occupancyRate >= 80.0) std::cout << "[CRITICAL]";
+        else std::cout << "[OK]";
+        std::cout << std::endl;
+    }
+    std::cout << "====================================" << std::endl << std::endl;
 }
 
 void IOModule::printError(const std::string& message) {
