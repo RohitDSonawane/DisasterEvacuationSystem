@@ -1,89 +1,37 @@
 # Disaster Evacuation System
 
-A robust C++ application designed to manage regional hierarchies, road networks, and optimize the evacuation of affected populations to nearby relief centers during disasters.
+Welcome to the **Disaster Evacuation System** repository! This project provides a complete suite of tools to manage emergency evacuations, regional hierarchies, and road networks during disaster scenarios.
 
-## 🚀 Features
+This repository contains two main components to meet different needs:
 
-- **Administrative Hierarchy**: Manages complex regional structures (States -> Districts -> Cities -> Zones) using a tree data structure.
-- **Shortest Path Analysis**: Implements **Dijkstra's Algorithm** to find the most efficient routes from affected zones to relief centers.
-- **Multi-Shelter Allocation**: Automatically splits populations across multiple shelters if the closest one is at capacity.
-- **Interactive CLI**: Real-time management of disaster scenarios with commands for updating populations and triggering evacuations.
-- **Dynamic Status Tracking**: Live monitoring of relief center occupancy rates with status indicators (`OK`, `CRITICAL`, `FULL`).
+1. **ReliefRoute (The Web Application):** A modern, interactive dashboard for visual and real-time crisis management.
+2. **The C++ Engine (The Command Line Tool):** A blazing-fast, robust backend that handles the heavy lifting of calculating shortest paths and managing shelter allocations.
 
----
+## What's Inside?
 
-## 🏗️ Architecture
+### 1. ReliefRoute - Web Dashboard
 
-The system is built on a modular C++ architecture:
+Located in the `ReliefRoute/` folder, this is a fully-featured Next.js web application. It provides a visual interface for tactical responders to plan routes, monitor shelter capacities, and track ongoing evacuations in real time. It uses the C++ Engine under the hood for highly optimized route calculations.
+[Read the Web App Documentation](./ReliefRoute/README.md)
 
-- **TreeModule**: Manages the administrative tree and handles population aggregation.
-- **GraphModule**: Handles the road network adjacency list and shortest-path calculations.
-- **AllocationModule**: core logic for greedy multi-shelter assignment based on distance and remaining capacity.
-- **IOModule**: Handles file parsing and the interactive user interface.
+### 2. Core C++ Engine - Command Line Interface
 
----
+Located in the `src/` folder, this is the core algorithm engine. It manages complex regional structures using tree data structures and calculates the most efficient evacuation routes using Dijkstra's Algorithm. It seamlessly handles multi-shelter allocations and can be run independently as an interactive CLI application.
+[Read the CLI Documentation](./src/README.md)
 
-## 📁 Data Format
+## Getting Started
 
-The system uses space-separated text files for initialization:
+Depending on your preference, you can choose to run the highly interactive Web Dashboard or the lightning-fast Command Line script.
 
-### `admin.txt`
-Defines the regional hierarchy and relief centers.
-`ENTITY <TYPE> <NAME> <PARENT_NAME> [CAPACITY]`
+- **To start the visual dashboard:** Head over to the `ReliefRoute` folder and follow the setup instructions there.
+- **To dive straight into the code or terminal:** Navigate to the `src` folder for the standalone CLI tool logic.
 
-### `graph.txt`
-Defines road connections (Edges) between nodes.
-`ROAD <NODE1> <NODE2> <DISTANCE>`
+## Documentation
 
-### `disaster.txt` (Optional)
-Pre-loads disaster data.
-`AFFECTED <ZONE_NAME> <COUNT>`
-`EVACUATE <ZONE_NAME> <COUNT>`
+To help you understand the architecture, operation, and data requirements of this project, we have provided the following detailed guides:
 
----
+- [System Architecture](./ARCHITECTURE.md): Explains the high-level decoupled design, detailing how the Next.js frontend, Node.js backend, and C++ engine interact.
+- [Operational Workflow](./WORKFLOW.md): Outlines the lifecycle of a disaster event in the system, from map setup to executing an evacuation.
+- [Data Formats Guide](./DATA_FORMATS.md): An in-depth syntax guide for the text files (`admin.txt`, `graph.txt`, `disaster.txt`) used to build custom scenarios.
 
-## 🛠️ Compilation
-
-Use any standard C++ compiler (C++11 or later):
-
-```powershell
-g++ src/main.cpp src/AllocationModule.cpp src/GraphModule.cpp src/IOModule.cpp src/TreeModule.cpp src/TreeNode.cpp -o program.exe
-```
-
----
-
-## 💻 Usage
-
-Run the program from the `src` directory or provide paths to the files:
-
-```powershell
-cd src
-.\program.exe admin.txt graph.txt [disaster.txt]
-```
-
-### Interactive Commands
-
-Once in the system, you can use the following commands:
-
-- `AFFECTED <Zone> <Count>`: Update the number of people affected in a specific zone.
-- `EVACUATE <Zone> <Count>`: Assign the population to the closest available shelter(s).
-- `STATUS`: View the entire administrative hierarchy and total affected counts.
-- `SUMMARY`: View relief center status, occupancy, and remaining capacity.
-- `EXIT`: Terminate the program.
-
----
-
-## 📝 Example Output
-
-```text
---- Evacuation Plan for Zone_A (700 people) ---
- Assignment [1]:
-  Shelter  : Shelter_1 (Allocated: 500)
-  Distance : 5 km
-  Route    : Zone_A -> Shelter_1
- Assignment [2]:
-  Shelter  : Shelter_2 (Allocated: 200)
-  Distance : 7 km
-  Route    : Zone_A -> Zone_B -> Shelter_2
---------------------------------------------------------
-```
+We built this system aiming to save lives through smart, data-driven planning and rapid rescue coordination. Feel free to explore the modules to adapt them to your specific crisis management requirements.
