@@ -6,6 +6,8 @@ class ReliefRouteEngine {
         this.engineProcess = null;
         this.commandQueue = [];
         this.isProcessing = false;
+        this.isReady = false;
+        this.readyResolvers = [];
         
         // Paths to data files
         this.adminPath = path.join(__dirname, 'data', 'admin.txt');
@@ -15,7 +17,10 @@ class ReliefRouteEngine {
 
     start() {
         console.log('Starting ReliefRoute C++ Engine...');
+        this.isReady = false;
         this.engineProcess = spawn(this.engineBinary, [this.adminPath, this.graphPath, '--json']);
+        this.isReady = true;
+        this._resolveReady();
 
         this.engineProcess.stdout.on('data', (data) => {
             const lines = data.toString().split('\n');
@@ -31,14 +36,37 @@ class ReliefRouteEngine {
         });
 
         this.engineProcess.on('close', (code) => {
+            this.isReady = false;
             console.log(`Engine process exited with code ${code}. Restarting in 2s...`);
             setTimeout(() => this.start(), 2000);
         });
     }
 
+    async restart() {
+        this.isReady = false;
+        if (this.engineProcess) {
+            this.engineProcess.kill();
+        }
+        await this.awaitReady(5000);
+    }
+
+    awaitReady(timeoutMs = 5000) {
+        if (this.isReady && this.engineProcess && !this.engineProcess.killed) {
+            return Promise.resolve(true);
+        }
+
+        return new Promise((resolve) => {
+            const timeout = setTimeout(() => resolve(false), timeoutMs);
+            this.readyResolvers.push(() => {
+                clearTimeout(timeout);
+                resolve(true);
+            });
+        });
+    }
+
     sendCommand(cmdObj) {
         return new Promise((resolve, reject) => {
-            const cmdStr = JSON.stringify(cmdObj) + '\n';
+            const cmdStr = this._serializeCommand(cmdObj);
             this.commandQueue.push({ resolve, reject, cmdStr });
             this._processQueue();
         });
@@ -74,6 +102,21 @@ class ReliefRouteEngine {
         }
 
         this._processQueue();
+    }
+
+    _resolveReady() {
+        while (this.readyResolvers.length > 0) {
+            const resolve = this.readyResolvers.shift();
+            resolve();
+        }
+    }
+
+    _serializeCommand(cmdObj) {
+        const parts = [];
+        if (cmdObj.cmd) parts.push(`"cmd": "${cmdObj.cmd}"`);
+        if (typeof cmdObj.zone === 'string') parts.push(`"zone": "${cmdObj.zone}"`);
+        if (typeof cmdObj.count === 'number') parts.push(`"count": ${cmdObj.count}`);
+        return `{ ${parts.join(', ')} }\n`;
     }
 }
 

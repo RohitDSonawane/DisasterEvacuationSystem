@@ -3,15 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useStore } from '@/lib/store';
-
-interface TreeNode {
-    name: string;
-    type: string;
-    affectedPeople: number;
-    capacity: number;
-    occupancy: number;
-    children?: TreeNode[];
-}
+import { TreeNode } from '@/lib/types';
 
 function NodeRow({ node, level }: { node: TreeNode; level: number }) {
     const [isExpanded, setIsExpanded] = useState(level < 1);
@@ -47,15 +39,15 @@ function NodeRow({ node, level }: { node: TreeNode; level: number }) {
                 </div>
                 <div className="col-span-2">
                     <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded ${
-                        node.type === 'ReliefCenter' ? 'bg-emerald-50 text-emerald-700' :
-                        node.type === 'Administrative' ? 'bg-slate-100 text-slate-600' :
+                        node.type === 'RELIEFCENTER' ? 'bg-emerald-50 text-emerald-700' :
+                        node.type === 'ZONE' ? 'bg-orange-50 text-orange-600' :
                         'bg-orange-50 text-orange-600'
                     }`}>
                         {node.type}
                     </span>
                 </div>
                 <div className="col-span-2">
-                    {node.type === 'ReliefCenter' ? (
+                    {node.type === 'RELIEFCENTER' ? (
                         <div className="w-full max-w-[120px]">
                             <div className="flex justify-between items-center mb-1 font-mono text-[9px] font-bold">
                                 <span className={occupancyRate >= 0.9 ? 'text-orange-600' : 'text-slate-400'}>
@@ -92,17 +84,17 @@ function NodeRow({ node, level }: { node: TreeNode; level: number }) {
 }
 
 export default function ZoneHierarchy() {
-    const { setIsLoading, setError } = useStore();
+    const { setError } = useStore();
     const [root, setRoot] = useState<TreeNode | null>(null);
 
     const fetchData = async () => {
         try {
             const data = await api.getStatus();
-            if (data && data.name) {
-                setRoot(data);
+            if (data.success && data.data?.tree) {
+                setRoot(data.data.tree);
             }
         } catch (err: any) {
-            console.error('Hierarchy sync failed:', err);
+            setError(err.message);
         }
     };
 
@@ -117,10 +109,10 @@ export default function ZoneHierarchy() {
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <span className="font-mono text-xs uppercase tracking-[0.2em] text-primary-container font-black">Tactical Node: Registry Matrix</span>
+                        <span className="font-mono text-xs uppercase tracking-[0.2em] text-primary-container font-black">Data Overview</span>
                         <h1 className="text-4xl font-extrabold text-slate-900 tracking-tighter mt-1 uppercase">Zone Hierarchy</h1>
                         <p className="text-slate-500 font-medium max-w-2xl mt-2 leading-relaxed">
-                            Complete administrative taxonomy of the mission area. Monitor population distribution across districts, cities, and tactical zones in real-time.
+                            Complete overview of the regions. Monitor population distribution across districts, cities, and zones in real-time.
                         </p>
                     </div>
                 </div>
@@ -128,10 +120,10 @@ export default function ZoneHierarchy() {
                 <div className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm shadow-slate-200/50">
                     {/* Header Row */}
                     <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-slate-900 border-b border-slate-800">
-                        <div className="col-span-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Administrative Entity</div>
+                        <div className="col-span-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Entity</div>
                         <div className="col-span-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Classification</div>
                         <div className="col-span-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status / Capacity</div>
-                        <div className="col-span-2 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tactical ID</div>
+                        <div className="col-span-2 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">ID</div>
                     </div>
 
                     {/* Tree Root */}
@@ -144,30 +136,6 @@ export default function ZoneHierarchy() {
                                 <p className="text-slate-400 font-bold uppercase tracking-widest mt-4 text-xs">Syncing Registry...</p>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* Legend & Stats */}
-                <div className="mt-8 grid grid-cols-4 gap-4">
-                    <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-lg">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-2">Relief Priority</p>
-                        <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-primary-container shadow-[0_0_10px_rgba(255,97,1,0.4)]" />
-                            <span className="text-white font-bold text-sm tracking-tight uppercase">Active Crisis</span>
-                        </div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-1">Hierarchy Depth</p>
-                         <p className="text-2xl font-black text-slate-900 font-mono tracking-tight">LEVEL 04</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center col-span-2">
-                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-2">Registry Integrity</p>
-                         <div className="flex items-center gap-4">
-                            <div className="h-2 flex-1 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                                <div className="h-full bg-emerald-500 w-[99.8%]" />
-                            </div>
-                            <span className="font-mono text-sm font-black text-emerald-600 uppercase">99.8% SYNC</span>
-                         </div>
                     </div>
                 </div>
             </div>

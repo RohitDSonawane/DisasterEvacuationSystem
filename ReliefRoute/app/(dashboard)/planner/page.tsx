@@ -12,22 +12,18 @@ export default function EvacuationPlanner() {
     const [headcount, setHeadcount] = useState<number>(100);
     const [plan, setPlan] = useState<EvacuationResult | null>(null);
 
-    // For "Update Affected"
-    const [updateZone, setUpdateZone] = useState('');
-    const [updateCount, setUpdateCount] = useState<number>(0);
-
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 const statusRes = await api.getStatus();
-                if (statusRes.success) {
+                if (statusRes.success && statusRes.data?.tree) {
                     // Extract flat list of nodes from tree
                     const allNodes: string[] = [];
                     const traverse = (node: any) => {
                         allNodes.push(node.name);
                         node.children?.forEach(traverse);
                     };
-                    traverse(statusRes);
+                    traverse(statusRes.data.tree);
                     setZones(allNodes);
                 }
             } catch (err) {
@@ -46,27 +42,10 @@ export default function EvacuationPlanner() {
         setPlan(null);
         try {
             const res = await api.evacuate({ zone: selectedZone, count: headcount });
-            if (res.success) {
-                setPlan(res);
+            if (res.success && res.data) {
+                setPlan(res.data);
             } else {
-                throw new Error(res.errorMessage || 'Evacuation execution failed');
-            }
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdateAffected = async () => {
-        if (!updateZone) return;
-        setIsLoading(true);
-        try {
-            const res = await api.updateAffected({ zone: updateZone, count: updateCount });
-            if (res.success) {
-                // Done
-            } else {
-                throw new Error(res.message);
+                throw new Error(res.error || 'Evacuation execution failed');
             }
         } catch (err: any) {
             setError(err.message);
@@ -79,9 +58,14 @@ export default function EvacuationPlanner() {
         <main className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="max-w-[1400px] mx-auto">
                 <div className="mb-10">
-                    <h1 className="text-4xl font-extrabold text-on-surface tracking-tight mb-2 text-slate-900">Evacuation Planner</h1>
-                    <p className="text-on-surface-variant max-w-2xl leading-relaxed font-medium">
-                        Configure real-time evacuation parameters and execute high-precision routing logic based on current population density and zone risks.
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-primary-container/10 rounded-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-3xl text-primary-container">crisis_alert</span>
+                        </div>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Evacuation Planner</h1>
+                    </div>
+                    <p className="text-slate-500 max-w-2xl leading-relaxed font-medium ml-[60px]">
+                        Plan and execute safe evacuation routes. Choose a source zone and the number of people to efficiently route them to the nearest available shelters.
                     </p>
                 </div>
 
@@ -126,47 +110,36 @@ export default function EvacuationPlanner() {
                                     className="w-full bg-gradient-to-br from-primary-container to-primary text-white rounded-full py-4 text-xs font-black uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                 >
                                     Execute Evacuation
-                                    <span className="material-symbols-outlined text-base">arrow_forward</span>
+                                    <span className="material-symbols-outlined text-base">warning</span>
                                 </button>
                             </div>
                         </section>
 
-                        {/* Update Affected Count Card */}
-                        <section className="bg-slate-50/50 rounded-xl p-8 border border-slate-200 shadow-inner">
-                            <div className="flex items-center gap-3 mb-8">
-                                <span className="material-symbols-outlined text-on-surface-variant">edit_note</span>
-                                <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-700">Update Affected Count</h3>
-                            </div>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-2">Target Zone</label>
-                                    <select 
-                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary-container outline-none transition-all font-mono"
-                                        value={updateZone}
-                                        onChange={(e) => setUpdateZone(e.target.value)}
-                                    >
-                                        <option value="">Select Zone...</option>
-                                        {zones.map(z => (
-                                            <option key={z} value={z}>{z}</option>
-                                        ))}
-                                    </select>
+                        <section className="bg-slate-900 rounded-xl p-8 text-white shadow-xl relative overflow-hidden group">
+                            <div className="absolute inset-0 opacity-10 hero-mesh transition-transform duration-1000 group-hover:scale-110"></div>
+                            
+                            <div className="relative z-10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary-container text-sm">memory</span>
+                                    </div>
+                                    <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-300">System Configuration</h3>
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-2">Revised Headcount</label>
-                                    <input 
-                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary-container outline-none transition-all font-mono" 
-                                        placeholder="New population count" 
-                                        type="number"
-                                        value={updateCount}
-                                        onChange={(e) => setUpdateCount(parseInt(e.target.value))}
-                                    />
+                                
+                                <div className="space-y-4 font-mono">
+                                    <div className="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5">
+                                        <span className="text-[10px] text-slate-500 uppercase tracking-widest">Routing Method</span>
+                                        <span className="text-xs font-bold text-emerald-400">Optimized Routing</span>
+                                    </div>
+                                    <div className="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5">
+                                        <span className="text-[10px] text-slate-500 uppercase tracking-widest">Coverage</span>
+                                        <span className="text-xs font-bold text-emerald-400">Regional</span>
+                                    </div>
+                                    <div className="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5">
+                                        <span className="text-[10px] text-slate-500 uppercase tracking-widest">Routing Fallback</span>
+                                        <span className="text-[10px] font-black tracking-widest bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">ACTIVE</span>
+                                    </div>
                                 </div>
-                                <button 
-                                    onClick={handleUpdateAffected}
-                                    className="w-full border border-slate-300 text-on-surface rounded-full py-3 text-xs font-bold uppercase tracking-widest hover:bg-white transition-colors"
-                                >
-                                    Update Data Store
-                                </button>
                             </div>
                         </section>
                     </div>
@@ -205,7 +178,7 @@ export default function EvacuationPlanner() {
                                                         <span className="ml-2 text-slate-400">[{asgn.distance} KM]</span>
                                                     </div>
                                                     <div className="p-4 bg-slate-900 rounded-lg font-mono text-[11px] text-emerald-400 leading-relaxed overflow-x-auto shadow-inner">
-                                                        <span className="text-slate-500 mr-2 uppercase text-[9px]">Route Execution Path:</span> 
+                                                        <span className="text-slate-500 mr-2 uppercase text-[9px]">Calculated Route:</span> 
                                                         <div className="mt-1">{asgn.route.join(' → ')}</div>
                                                     </div>
                                                 </div>

@@ -20,7 +20,7 @@ export default function LandingPage() {
                 <div>
                     <Link href="/login">
                         <button className="font-sans font-bold uppercase tracking-wider text-[10px] px-5 py-2 border border-outline/20 rounded-full hover:bg-slate-50 transition-all active:scale-95 duration-150">
-                            Officer Login
+                            Log In
                         </button>
                     </Link>
                 </div>
@@ -131,7 +131,7 @@ export default function LandingPage() {
                     </p>
                     <Link href="/login">
                         <button className="bg-white text-primary font-black uppercase gap-3 tracking-widest text-sm px-10 py-5 rounded-full hover:bg-slate-100 transition-all active:scale-95 shadow-2xl flex items-center mx-auto group">
-                            Officer Login
+                            Log In
                             <span className="material-symbols-outlined font-black group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </button>
                     </Link>

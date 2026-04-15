@@ -3,18 +3,18 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useStore } from '@/lib/store';
-import { ShelterStatus as TShelterStatus } from '@/lib/types';
+import { ShelterSummary } from '@/lib/types';
 
 export default function ShelterStatusPage() {
-    const { setIsLoading, setError } = useStore();
-    const [shelters, setShelters] = useState<TShelterStatus[]>([]);
+    const { setError } = useStore();
+    const [shelters, setShelters] = useState<ShelterSummary[]>([]);
     const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString());
 
     const fetchShelters = async () => {
         try {
             const data = await api.getSummary();
-            if (Array.isArray(data)) {
-                setShelters(data);
+            if (data.success && Array.isArray(data.data)) {
+                setShelters(data.data);
                 setLastSync(new Date().toLocaleTimeString());
             }
         } catch (err: any) {
@@ -38,9 +38,9 @@ export default function ShelterStatusPage() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2 uppercase">Shelter Monitoring</h1>
+                        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2 uppercase">Shelters</h1>
                         <p className="text-slate-500 font-medium max-w-2xl">
-                            Real-time facility occupancy tracking and capacity alerting system. Linked directly to evacuation tactical relays.
+                            Monitor shelter occupancy and capacity in real-time.
                         </p>
                     </div>
                     <div className="flex items-center gap-2 text-slate-400 font-mono text-[10px] bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">

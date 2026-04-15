@@ -9,16 +9,19 @@ export default function OperationsDashboard() {
     const { setIsLoading, setError } = useStore();
     const [status, setStatus] = useState<SystemStatus | null>(null);
     const [shelters, setShelters] = useState<ShelterSummary[]>([]);
+    const [activities, setActivities] = useState<any[]>([]);
     
     const fetchData = async () => {
         try {
-            const [statusRes, summaryRes] = await Promise.all([
+            const [statusRes, summaryRes, activityRes] = await Promise.all([
                 api.getStatus(),
-                api.getSummary()
+                api.getSummary(),
+                api.getActivity()
             ]);
             
-            if (statusRes.success) setStatus(statusRes.status);
-            if (summaryRes.success) setShelters(summaryRes.shelters);
+            if (statusRes.success && statusRes.data) setStatus(statusRes.data);
+            if (summaryRes.success && summaryRes.data) setShelters(summaryRes.data);
+            if (activityRes.success && activityRes.data) setActivities(activityRes.data);
         } catch (err: any) {
             console.error('Failed to fetch dashboard data:', err);
         }
@@ -31,14 +34,46 @@ export default function OperationsDashboard() {
     }, []);
 
     const runEvacuation = async () => {
+        const zone = prompt("Enter Zone Name (e.g., Zone_A):");
+        if (!zone) return;
+        const countStr = prompt("Enter Number of People to Evacuate:");
+        if (!countStr) return;
+        const count = parseInt(countStr, 10);
+        if (isNaN(count) || count <= 0) {
+            setError('Please provide a valid evacuation count');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            const res = await api.evacuate();
-            if (res.success) {
-                // Refresh data
+            const res = await api.evacuate({ zone, count });
+            if (res.success && res.data?.success) {
                 fetchData();
             } else {
-                throw new Error(res.error || 'Evacuation failed');
+                throw new Error(res.error || res.data?.errorMessage || 'Evacuation failed');
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleMarkAffected = async () => {
+        const zone = prompt("Enter Zone Name (e.g., ZONE-K-1):");
+        if (!zone) return;
+        const countStr = prompt("Enter Number of Affected People:");
+        if (!countStr) return;
+        const count = parseInt(countStr);
+        if (isNaN(count)) return;
+
+        setIsLoading(true);
+        try {
+            const res = await api.updateAffected({ zone, count });
+            if (res.success) {
+                fetchData();
+            } else {
+                throw new Error(res.message || 'Update failed');
             }
         } catch (err: any) {
             setError(err.message);
@@ -54,7 +89,7 @@ export default function OperationsDashboard() {
                 <StatCard 
                     label="Total Affected" 
                     value={status?.totalAffected?.toLocaleString() || '0'} 
-                    trend="+12%" 
+                    trend={`${Math.round(((status?.totalAffected || 0) / 5000) * 100)}% cap`} // Mock trend based on base cap
                     icon="group"
                 />
                 <StatCard 
@@ -66,18 +101,18 @@ export default function OperationsDashboard() {
                 />
                 <StatCard 
                     label="Shelters Available" 
-                    value={shelters.filter(s => s.currentCapacity < s.maxCapacity).length.toString()} 
+                    value={shelters.filter(s => s.occupancy < s.capacity).length.toString()} 
                     status="ONLINE"
                     icon="home_work"
                     accentColor="emerald"
                 />
                 <StatCard 
                     label="Shelters Critical" 
-                    value={shelters.filter(s => (s.currentCapacity / s.maxCapacity) > 0.9).length.toString()} 
+                    value={shelters.filter(s => (s.occupancy / s.capacity) > 0.9).length.toString()} 
                     status="CAPACITY REACHED"
                     icon="warning"
                     accentColor="red"
-                    critical={shelters.some(s => (s.currentCapacity / s.maxCapacity) > 0.9)}
+                    critical={shelters.some(s => (s.occupancy / s.capacity) > 0.9)}
                 />
             </div>
 
@@ -90,28 +125,21 @@ export default function OperationsDashboard() {
                         <span className="material-symbols-outlined text-slate-400 text-sm">history</span>
                     </div>
                     <div className="p-6">
-                        <div className="space-y-4">
-                            <ActivityItem 
-                                zone="ZONE-DELTA-4" 
-                                task="Route Alpha Verification" 
-                                time="14:02:45" 
-                                status="In Transit"
-                                color="primary" 
-                            />
-                            <ActivityItem 
-                                zone="ZONE-SIERRA-9" 
-                                task="Secondary Sweep Complete" 
-                                time="13:58:12" 
-                                status="Cleared"
-                                color="emerald" 
-                            />
-                            <ActivityItem 
-                                zone="ZONE-WHISKEY-2" 
-                                task="Hazard Barrier Breached" 
-                                time="13:45:00" 
-                                status="Emergency"
-                                color="red" 
-                            />
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {activities.length > 0 ? activities.map(activity => (
+                                <ActivityItem 
+                                    key={activity.id}
+                                    zone={activity.zone} 
+                                    task={activity.task} 
+                                    time={activity.time} 
+                                    status={activity.status}
+                                    color={activity.color} 
+                                />
+                            )) : (
+                                <div className="text-slate-400 text-[10px] font-black uppercase text-center py-10 tracking-widest">
+                                    Awaiting updates...
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -124,9 +152,9 @@ export default function OperationsDashboard() {
                     <div className="p-6 space-y-6">
                         {shelters.length > 0 ? shelters.map((shelter, i) => (
                             <OccupancyRow 
-                                key={shelter.id}
+                                key={shelter.id || `${shelter.name}-${i}`}
                                 name={shelter.name}
-                                percentage={Math.round((shelter.currentCapacity / shelter.maxCapacity) * 100)}
+                                percentage={Math.round((shelter.occupancy / (shelter.capacity || 1)) * 100)}
                             />
                         )) : (
                             <div className="text-slate-400 text-xs font-mono uppercase text-center py-10">
@@ -145,12 +173,15 @@ export default function OperationsDashboard() {
                         <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
                     </div>
                     <div>
-                        <h3 className="text-white font-bold text-sm tracking-tight">Tactical Quick Actions</h3>
-                        <p className="text-slate-400 text-xs uppercase tracking-widest font-semibold mt-0.5">Priority Protocol Override</p>
+                        <h3 className="text-white font-bold text-sm tracking-tight">Quick Actions</h3>
+                        <p className="text-slate-400 text-xs uppercase tracking-widest font-semibold mt-0.5">Manual Overrides</p>
                     </div>
                 </div>
                 <div className="flex gap-4 relative z-10">
-                    <button className="px-6 py-3 rounded-full border border-slate-700 text-white text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all active:scale-95">
+                    <button 
+                        onClick={handleMarkAffected}
+                        className="px-6 py-3 rounded-full border border-slate-700 text-white text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all active:scale-95"
+                    >
                         Mark Affected Zone
                     </button>
                     <button 

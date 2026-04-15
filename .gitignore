@@ -3,3 +3,22 @@
 *.out
 .vscode/
 build/
+ReliefRoute/docs/testing-workflow.md
+ReliefRoute/backend/data/
+
+# ReliefRoute Next.js app ignores
+ReliefRoute/node_modules/
+ReliefRoute/.pnp*
+ReliefRoute/.yarn/
+ReliefRoute/coverage/
+ReliefRoute/.next/
+ReliefRoute/out/
+ReliefRoute/build/
+ReliefRoute/.DS_Store
+ReliefRoute/*.pem
+ReliefRoute/*-debug.log*
+ReliefRoute/.env*
+ReliefRoute/.vercel
+ReliefRoute/*.tsbuildinfo
+ReliefRoute/next-env.d.ts
+ReliefRoute/backend/data/

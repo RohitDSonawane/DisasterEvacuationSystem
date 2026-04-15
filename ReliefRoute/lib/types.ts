@@ -25,20 +25,49 @@ export interface EvacuationResult {
 }
 
 export interface ShelterSummary {
+    id?: string;
     name: string;
     occupancy: number;
     capacity: number;
     status: 'OK' | 'CRITICAL' | 'FULL';
 }
 
-export interface AuthState {
-    token: string | null;
-    isAuthenticated: boolean;
+export interface SystemStatus {
+    totalAffected: number;
+    totalEvacuated: number;
+    tree: TreeNode;
 }
 
 export interface SystemState {
-    tree: TreeNode | null;
+    status: SystemStatus | null;
     shelters: ShelterSummary[];
     isLoading: boolean;
     error: string | null;
+}
+
+export interface GraphEdge {
+    from: string;
+    to: string;
+    weight: number;
+}
+
+export interface GraphData {
+    nodes: string[];
+    edges: GraphEdge[];
+}
+
+export interface ActivityItem {
+    id: number;
+    zone: string;
+    task: string;
+    time: string;
+    status: string;
+    color: string;
+}
+
+export interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+    message?: string;
 }

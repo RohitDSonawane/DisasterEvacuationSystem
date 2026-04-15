@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
@@ -8,8 +9,8 @@ import Cookies from 'js-cookie';
 const navItems = [
     { icon: 'dashboard', label: 'Dashboard', href: '/dashboard', active: true },
     { icon: 'emergency_share', label: 'Evacuation Planner', href: '/planner' },
-    { icon: 'roofing', label: 'Shelter Status', href: '/shelters' },
-    { icon: 'layers', label: 'Zone Hierarchy', href: '/hierarchy' },
+    { icon: 'roofing', label: 'Shelters', href: '/shelters' },
+    { icon: 'layers', label: 'Region Hierarchy', href: '/hierarchy' },
     { icon: 'hub', label: 'Road Network', href: '/network' },
     { icon: 'settings', label: 'Data Setup', href: '/setup' },
 ];
@@ -17,7 +18,32 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { setToken } = useStore();
+    const { token, setToken } = useStore();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (mounted && !token) {
+            const storedToken = Cookies.get('rr_token');
+            if (storedToken) {
+                setToken(storedToken);
+            } else {
+                router.replace('/login');
+            }
+        }
+    }, [mounted, token, setToken, router]);
+
+    if (!mounted) {
+        return <div className="min-h-screen bg-[#F3F2F2]" />; 
+    }
+
+    // Only allow rendering if we have a token (either in state or just found in cookie)
+    if (!token && !Cookies.get('rr_token')) {
+        return null;
+    }
 
     const handleLogout = () => {
         setToken(null);
@@ -31,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <aside className="fixed inset-y-0 left-0 w-[240px] bg-[#201F22] flex flex-col py-6 px-4 z-50">
                 <div className="mb-10 px-4">
                     <div className="text-lg font-black text-white uppercase tracking-widest">ReliefRoute</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mt-1">Command Center</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mt-1">Management Dashboard</div>
                 </div>
 
                 <nav className="flex-1 space-y-2">
@@ -116,7 +142,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <footer className="mt-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-12 py-16 w-full bg-[#201F22] text-slate-500 text-xs uppercase tracking-widest">
                     <div className="flex flex-col gap-4">
                         <span className="text-white font-black">ReliefRoute</span>
-                        <p className="max-w-xs leading-relaxed opacity-60">© 2024 ReliefRoute High-Precision Crisis Management. Sentinel Tactical Protocol v4.2.</p>
+                        <p className="max-w-xs leading-relaxed opacity-60">© 2024 ReliefRoute. Evacuation Management System v1.0.</p>
                     </div>
                     <div className="flex flex-col gap-4">
                         <span className="text-white font-bold mb-2">Systems</span>
