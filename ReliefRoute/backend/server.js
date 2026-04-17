@@ -1,3 +1,7 @@
+/**
+ * ReliefRoute API Server
+ * Core service for disaster evacuation coordination
+ */
 const express = require('express');
 const cors = require('cors');
 const engine = require('./engine');
