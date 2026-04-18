@@ -11,6 +11,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = 8080;
+const VERSION = '1.2.0-TACTICAL';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const sessions = new Map();
 const DATA_DIR = path.join(__dirname, 'data');
