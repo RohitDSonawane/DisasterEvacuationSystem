@@ -112,11 +112,16 @@ class ReliefRouteEngine {
     }
 
     _serializeCommand(cmdObj) {
-        const parts = [];
-        if (cmdObj.cmd) parts.push(`"cmd": "${cmdObj.cmd}"`);
-        if (typeof cmdObj.zone === 'string') parts.push(`"zone": "${cmdObj.zone}"`);
-        if (typeof cmdObj.count === 'number') parts.push(`"count": ${cmdObj.count}`);
-        return `{ ${parts.join(', ')} }\n`;
+        const payload = {
+            cmd: cmdObj.cmd,
+            zone: cmdObj.zone,
+            count: cmdObj.count
+        };
+        // Filter out undefined values
+        const cleanPayload = Object.fromEntries(
+            Object.entries(payload).filter(([_, v]) => v !== undefined)
+        );
+        return `${JSON.stringify(cleanPayload)}\n`;
     }
 }
 
