@@ -203,8 +203,8 @@ app.get('/api/activity', validateAuth, (req, res) => {
 // Update Affected People
 app.post('/api/affected', validateAuth, async (req, res) => {
     const { zone, count } = req.body;
-    if (!zone || typeof zone !== 'string' || Number.isNaN(Number(count))) {
-        return sendError(res, 400, 'zone (string) and count (number) are required');
+    if (!zone || typeof zone !== 'string' || Number.isNaN(Number(count)) || Number(count) < 0) {
+        return sendError(res, 400, 'zone (string) and count (non-negative number) are required');
     }
     try {
         const result = await engine.sendCommand({ cmd: "AFFECTED", zone, count: Number(count) });
@@ -220,8 +220,8 @@ app.post('/api/affected', validateAuth, async (req, res) => {
 // Run Evacuation
 app.post('/api/evacuate', validateAuth, async (req, res) => {
     const { zone, count } = req.body;
-    if (!zone || typeof zone !== 'string' || Number.isNaN(Number(count))) {
-        return sendError(res, 400, 'zone (string) and count (number) are required');
+    if (!zone || typeof zone !== 'string' || Number.isNaN(Number(count)) || Number(count) < 0) {
+        return sendError(res, 400, 'zone (string) and count (non-negative number) are required');
     }
     try {
         const result = await engine.sendCommand({ cmd: "EVACUATE", zone, count: Number(count) });
