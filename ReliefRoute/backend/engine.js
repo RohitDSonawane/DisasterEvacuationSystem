@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 class ReliefRouteEngine {
@@ -18,6 +19,13 @@ class ReliefRouteEngine {
     start() {
         console.log('Starting ReliefRoute C++ Engine...');
         this.isReady = false;
+
+        if (!fs.existsSync(this.engineBinary)) {
+            console.error(`Engine Binary NOT FOUND at: ${this.engineBinary}`);
+            console.error('Please ensure the C++ engine is compiled.');
+            return;
+        }
+
         this.engineProcess = spawn(this.engineBinary, [this.adminPath, this.graphPath, '--json']);
         this.isReady = true;
         this._resolveReady();
