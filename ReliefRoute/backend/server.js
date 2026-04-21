@@ -32,6 +32,10 @@ function parseCookieValue(header = '') {
     }, {});
 }
 
+function getFormattedTime() {
+    return new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
 function loadActivityLog() {
     try {
         if (fs.existsSync(ACTIVITY_LOG_PATH)) {
@@ -41,7 +45,7 @@ function loadActivityLog() {
     } catch (err) {
         console.error('Failed to load activity log:', err.message);
     }
-    return [{ id: Date.now(), zone: 'INIT', task: 'System Boot Sequence', time: new Date().toLocaleTimeString(), status: 'Cleared', color: 'emerald' }];
+    return [{ id: Date.now(), zone: 'INIT', task: 'System Boot Sequence', time: getFormattedTime(), status: 'Cleared', color: 'emerald' }];
 }
 
 function persistActivityLog(log) {
@@ -55,7 +59,7 @@ function addActivity(zone, task, status, color = 'primary') {
         id: Date.now(),
         zone,
         task,
-        time: new Date().toLocaleTimeString(),
+        time: getFormattedTime(),
         status,
         color
     });
