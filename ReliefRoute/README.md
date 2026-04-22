@@ -15,6 +15,17 @@
 - **Backend Communication:** A custom Node.js Express server (`backend/server.js`) interfaces smoothly with the centralized C++ engine. The C++ application acts as a sub-process passing real-time JSON payloads back and forth to keep your data accurate.
 - **State Management:** Utilizes modern solutions like Zustand to keep your dashboard synchronized without performance drops.
 
+## Technical Stack
+
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| UI Framework | Next.js 15 | Routing & SSR |
+| Styling | Tailwind CSS | Responsive Design |
+| Backend | Node.js / Express | API Orchestration |
+| Logic Engine | C++ | Route Calculation (Dijkstra) |
+| Communication | JSON over Stdio | Engine Interop |
+| Icons | Lucide / Google Symbols | Visual Indicators |
+
 ## Getting Started
 
 To get the application up and running on your local machine, you will need to start both the Node.js backend server and the Next.js frontend development server.
