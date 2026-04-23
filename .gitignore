@@ -17,7 +17,10 @@ ReliefRoute/build/
 ReliefRoute/.DS_Store
 ReliefRoute/*.pem
 ReliefRoute/*-debug.log*
-ReliefRoute/.env*
+ReliefRoute/.env
+ReliefRoute/.env.local
+ReliefRoute/.env.*.local
+!ReliefRoute/.env.example
 ReliefRoute/.vercel
 ReliefRoute/*.tsbuildinfo
 ReliefRoute/next-env.d.ts
