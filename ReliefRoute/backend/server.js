@@ -427,5 +427,6 @@ app.get('/api/health', validateAuth, async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`ReliefRoute API Server running on http://localhost:${PORT}`);
+    console.log(`ReliefRoute API Server v${VERSION} running on http://localhost:${PORT}`);
+    console.log(`Node Environment: ${process.env.NODE_ENV || 'development'}`);
 });
