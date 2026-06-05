@@ -1,37 +1,112 @@
 # Disaster Evacuation System
 
-Welcome to the **Disaster Evacuation System** repository! This project provides a complete suite of tools to manage emergency evacuations, regional hierarchies, and road networks during disaster scenarios.
+![C++](https://img.shields.io/badge/Core-C%2B%2B17-blue)
+![Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra%20%7C%20Greedy-green)
+![Status](https://img.shields.io/badge/Status-Algorithm%20Prototype-yellow)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-This repository contains two main components to meet different needs:
+An academic computer-science project that models disaster evacuation as a **graph optimization problem**: shortest-path routing (Dijkstra) plus **capacity-constrained shelter allocation** (greedy strategy).
 
-1. **ReliefRoute (The Web Application):** A modern, interactive dashboard for visual and real-time crisis management.
-2. **The C++ Engine (The Command Line Tool):** A blazing-fast, robust backend that handles the heavy lifting of calculating shortest paths and managing shelter allocations.
+> **Current focus:** C++ algorithm engine  
+> **Future vision:** Full operational dashboard for emergency coordinators
 
-## What's Inside?
+---
 
-### 1. ReliefRoute - Web Dashboard
+## What's Inside
 
-Located in the `ReliefRoute/` folder, this is a fully-featured Next.js web application. It provides a visual interface for tactical responders to plan routes, monitor shelter capacities, and track ongoing evacuations in real time. It uses the C++ Engine under the hood for highly optimized route calculations.
-[Read the Web App Documentation](./ReliefRoute/README.md)
+| Component | Path | Status |
+|-----------|------|--------|
+| **Algorithm Engine** | [`engine/`](./engine/) | Primary artifact — CLI + JSON modes |
+| **ReliefRoute Dashboard** | [`ReliefRoute/`](./ReliefRoute/) | Prototype integration layer |
+| **Documentation** | [`docs/`](./docs/) | Algorithms, architecture, roadmap |
 
-### 2. Core C++ Engine - Command Line Interface
+---
 
-Located in the `src/` folder, this is the core algorithm engine. It manages complex regional structures using tree data structures and calculates the most efficient evacuation routes using Dijkstra's Algorithm. It seamlessly handles multi-shelter allocations and can be run independently as an interactive CLI application.
-[Read the CLI Documentation](./src/README.md)
+## Quick Start (Engine)
 
-## Getting Started
+```bash
+cd engine
+make
+make run
+```
 
-Depending on your preference, you can choose to run the highly interactive Web Dashboard or the lightning-fast Command Line script.
+Windows (without `make`):
 
-- **To start the visual dashboard:** Head over to the `ReliefRoute` folder and follow the setup instructions there.
-- **To dive straight into the code or terminal:** Navigate to the `src` folder for the standalone CLI tool logic.
+```powershell
+cd engine
+g++ main.cpp AllocationModule.cpp GraphModule.cpp IOModule.cpp TreeModule.cpp TreeNode.cpp -o reliefroute_engine.exe -std=c++17 -Wall -O2
+.\reliefroute_engine.exe samples\admin.txt samples\graph.txt
+```
+
+**CLI commands:** `AFFECTED <zone> <count>`, `EVACUATE <zone> <count>`, `STATUS`, `SUMMARY`, `EXIT`
+
+---
+
+## Optional: ReliefRoute Prototype Dashboard
+
+```bash
+# Terminal 1 — build engine first, then start API
+cd engine && make
+cd ../ReliefRoute
+node backend/server.js
+
+# Terminal 2 — frontend
+cd ReliefRoute
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Development login: `admin` / `admin123`.
+
+See [ReliefRoute/README.md](./ReliefRoute/README.md) for details.
+
+---
+
+## Algorithms at a Glance
+
+1. **N-ary tree** — administrative hierarchy with population aggregation
+2. **Adjacency list** — sparse road network representation
+3. **Dijkstra** — shortest paths from disaster zone to all shelters
+4. **Greedy allocation** — fill nearest shelters first, overflow to next closest
+
+Full analysis: [docs/ALGORITHMS.md](./docs/ALGORITHMS.md)
+
+---
+
+## Sample Scenario
+
+The committed `engine/samples/` dataset models a **Maharashtra** evacuation scenario with Mumbai, Pune, and Thane districts, 8 zones, and 7 relief centers.
+
+---
 
 ## Documentation
 
-To help you understand the architecture, operation, and data requirements of this project, we have provided the following detailed guides:
+| Document | Description |
+|----------|-------------|
+| [Algorithms](./docs/ALGORITHMS.md) | Problem definition, pseudocode, complexity |
+| [Architecture](./docs/ARCHITECTURE.md) | Three-tier system design |
+| [Workflow](./docs/WORKFLOW.md) | Disaster lifecycle phases |
+| [Data Formats](./docs/DATA_FORMATS.md) | `admin.txt` and `graph.txt` syntax |
+| [Roadmap](./docs/ROADMAP.md) | Current scope vs future vision |
 
-- [System Architecture](./ARCHITECTURE.md): Explains the high-level decoupled design, detailing how the Next.js frontend, Node.js backend, and C++ engine interact.
-- [Operational Workflow](./WORKFLOW.md): Outlines the lifecycle of a disaster event in the system, from map setup to executing an evacuation.
-- [Data Formats Guide](./DATA_FORMATS.md): An in-depth syntax guide for the text files (`admin.txt`, `graph.txt`, `disaster.txt`) used to build custom scenarios.
+---
 
-We built this system aiming to save lives through smart, data-driven planning and rapid rescue coordination. Feel free to explore the modules to adapt them to your specific crisis management requirements.
+## Project Structure
+
+```
+DisasterEvacuationSystem/
+├── engine/                 # Canonical C++ algorithm core
+│   ├── samples/            # Committed test scenarios
+│   ├── Makefile
+│   └── README.md
+├── ReliefRoute/            # Next.js prototype dashboard
+│   └── backend/            # Express API + engine bridge
+├── docs/                   # Academic & architecture docs
+└── README.md
+```
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

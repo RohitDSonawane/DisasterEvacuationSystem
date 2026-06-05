@@ -42,8 +42,7 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(url.toString(), { ...options, headers });
     
     if (response.status === 401) {
-        // Auth bypassed: Still logging just for visibility but not redirecting
-        console.warn('Backend returned 401, but auth is bypassed');
+        console.warn('Backend returned 401 — auth is prototype-only (see docs/ROADMAP.md)');
     }
 
     const payload = await response.json();

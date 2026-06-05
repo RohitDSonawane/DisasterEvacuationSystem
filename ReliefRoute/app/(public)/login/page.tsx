@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
@@ -47,14 +46,8 @@ export default function LoginPage() {
         <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950">
             {/* Left Panel: Tactical Visual (55%) */}
             <section className="hidden lg:relative lg:flex w-[55%] h-full bg-slate-900 overflow-hidden">
-                <Image 
-                    src="/hero-tactical.png" 
-                    alt="Tactical Command" 
-                    fill 
-                    className="object-cover opacity-60"
-                    priority
-                    loading="eager"
-                />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-primary-container/30" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-container/20 via-transparent to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
                 
                 <div className="absolute top-8 left-10 z-20">

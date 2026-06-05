@@ -1,48 +1,84 @@
-# ReliefRoute: Web Dashboard
+# ReliefRoute — Prototype Dashboard
 
-**ReliefRoute** is the visual front-end dashboard of the Disaster Evacuation System. Designed with Next.js and React, it provides an intuitive, high-precision interface for emergency management and immediate disaster response. 
+> **Status:** Integration prototype, not production-ready.  
+> The primary artifact of this repository is the C++ engine in [`../engine/`](../engine/).
 
-## Features
+ReliefRoute is a Next.js visual layer that demonstrates how the evacuation engine could be operated through a web interface. It spawns the C++ engine as a subprocess and communicates via JSON over stdin/stdout.
 
-- **Operations Dashboard:** A centralized control hub for tracking evacuated people, critical alerts, and active locations.
-- **Real-Time Shelter Monitoring:** Visually monitor shelter occupancy and capacity in real-time, ensuring everyone finds a safe place quickly.
-- **Evacuation Planning:** Select an area at risk, generate safe routes based on current road capacities, and trigger immediate evacuation plans using our advanced C++ routing engine securely running in the background.
-- **Network Overview:** View connectivity graphs to understand the roads and accessibility between different zones seamlessly.
+---
+
+## Prerequisites
+
+- Node.js 18+
+- C++ engine built from `../engine/` (see [engine/README.md](../engine/README.md))
+
+---
+
+## Setup
+
+```bash
+# 1. Build the engine
+cd ../engine
+make
+
+# 2. Install frontend dependencies
+cd ../ReliefRoute
+npm install
+
+# 3. Start API server (Terminal 1)
+node backend/server.js
+
+# 4. Start frontend (Terminal 2)
+npm run dev
+```
+
+On first launch, the API seeds `backend/data/` from `engine/samples/` automatically.
+
+Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Development Login
+
+| Field | Value |
+|-------|-------|
+| Username | `admin` |
+| Password | `admin123` |
+
+Authentication is prototype-only during development. See [docs/ROADMAP.md](../docs/ROADMAP.md) for production auth plans.
+
+---
+
+## Dashboard Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/dashboard` | Operations overview |
+| `/planner` | Set affected population, run evacuations |
+| `/shelters` | Shelter occupancy monitoring |
+| `/hierarchy` | Administrative tree view |
+| `/network` | Road network visualization |
+| `/setup` | Edit scenario data, factory reset |
+
+---
 
 ## Architecture
 
-- **Frontend:** Built with Next.js (App Router), React, and Tailwind CSS for rapid styling and highly responsive interfaces.
-- **Backend Communication:** A custom Node.js Express server (`backend/server.js`) interfaces smoothly with the centralized C++ engine. The C++ application acts as a sub-process passing real-time JSON payloads back and forth to keep your data accurate.
-- **State Management:** Utilizes modern solutions like Zustand to keep your dashboard synchronized without performance drops.
+```
+Next.js (:3000)  →  Express API (:8080)  →  engine/reliefroute_engine (--json)
+```
 
-## Technical Stack
+See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for the full system design.
 
-| Component | Technology | Role |
-| :--- | :--- | :--- |
-| UI Framework | Next.js 15 | Routing & SSR |
-| Styling | Tailwind CSS | Responsive Design |
-| Backend | Node.js / Express | API Orchestration |
-| Logic Engine | C++ | Route Calculation (Dijkstra) |
-| Communication | JSON over Stdio | Engine Interop |
-| Icons | Lucide / Google Symbols | Visual Indicators |
+---
 
-## Getting Started
+## Environment Variables
 
-To get the application up and running on your local machine, you will need to start both the Node.js backend server and the Next.js frontend development server.
+Copy `.env.example` to `.env` (optional):
 
-1. Add your project data: Ensure `admin.txt` and `graph.txt` (and conditionally `disaster.txt`) are present in the `backend/data/` folder.
-2. Install the necessary Node dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the custom Node.js backend server. This will also initiate the compiled C++ engine for route calculations. Open a terminal and run:
-   ```bash
-   node backend/server.js
-   ```
-4. Start the Next.js development server. Open a **new** terminal window and run:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to launch the dashboard and begin planning.
-
-This project was built to empower emergency teams. Explore the dashboard's features to visualize safety routes directly on screen!
+```
+PORT=8080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+NODE_ENV=development
+```

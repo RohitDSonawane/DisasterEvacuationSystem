@@ -15,10 +15,25 @@ const VERSION = '1.2.0-TACTICAL';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const sessions = new Map();
 const DATA_DIR = path.join(__dirname, 'data');
+const SAMPLES_DIR = path.join(__dirname, '..', '..', 'engine', 'samples');
 const ACTIVITY_LOG_PATH = path.join(DATA_DIR, 'activity.log.json');
+
+function seedDataFromSamples() {
+    if (!fs.existsSync(SAMPLES_DIR)) return;
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    for (const file of ['admin.txt', 'graph.txt']) {
+        const target = path.join(DATA_DIR, file);
+        if (!fs.existsSync(target)) {
+            fs.copyFileSync(path.join(SAMPLES_DIR, file), target);
+            console.log(`Seeded ${file} from engine/samples/`);
+        }
+    }
+}
 
 app.use(cors());
 app.use(express.json());
+
+seedDataFromSamples();
 
 // Start the C++ engine
 engine.start();
@@ -108,25 +123,24 @@ function validateGraphPayload(content) {
     return null;
 }
 
-// Auth Middleware (Basic) - BYPASSED AS REQUESTED
+// Auth middleware — development prototype only (see docs/ROADMAP.md)
 const validateAuth = (req, res, next) => {
     next();
 };
 
 // --- Routes ---
 
-// Mock user for now, but easily expandable to DB
+// Development credentials (non-production; see ReliefRoute/.env.example)
 const ADMIN_USER = {
     username: process.env.ADMIN_USERNAME || 'admin',
     password: process.env.ADMIN_PASSWORD || 'admin123'
 };
 
-// Login - HARDCODED AS REQUESTED
+// Development login — accepts any credentials during prototype phase
 app.post('/api/auth/login', (req, res) => {
-    const { username, password } = req.body;
-    // Always succeed with mock token
-    const token = 'rr_session_HARDCODED_OFFICER_STATION';
-    sessions.set(token, { username: username || 'admin', issuedAt: Date.now(), expiresAt: Date.now() + SESSION_TTL_MS });
+    const { username } = req.body;
+    const token = 'rr_session_dev_prototype';
+    sessions.set(token, { username: username || ADMIN_USER.username, issuedAt: Date.now(), expiresAt: Date.now() + SESSION_TTL_MS });
     sendSuccess(res, { token }, 'Login successful');
 });
 

@@ -101,6 +101,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Main Content Canvas */}
             <main className="ml-[240px] flex-1 flex flex-col min-h-screen">
+                <div className="bg-amber-500/10 border-b border-amber-500/20 px-8 py-2 text-center">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                        Prototype Integration Layer — Algorithm engine is the primary artifact
+                    </span>
+                </div>
                 {/* TopNavBar */}
                 <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md flex justify-between items-center w-full px-8 py-4 border-b border-surface-container-highest/20">
                     <div className="flex items-center gap-4">

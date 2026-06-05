@@ -52,7 +52,7 @@ The hallmark of this architectural design is the Inter-Process Communication (IP
 
 ## 3. The Core Processing Tier: C++ Core Application
 
-Located strictly in the `src/` directory, this layer represents the algorithmic brain and heavy-lifter of the entire operation.
+Located in the `engine/` directory, this layer represents the algorithmic brain and heavy-lifter of the entire operation.
 
 ### Core Objectives
 

@@ -2,6 +2,10 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const ENGINE_DIR = path.join(__dirname, '..', '..', 'engine');
+const SAMPLES_DIR = path.join(ENGINE_DIR, 'samples');
+const isWindows = process.platform === 'win32';
+
 class ReliefRouteEngine {
     constructor() {
         this.engineProcess = null;
@@ -9,11 +13,13 @@ class ReliefRouteEngine {
         this.isProcessing = false;
         this.isReady = false;
         this.readyResolvers = [];
-        
-        // Paths to data files
+
         this.adminPath = path.join(__dirname, 'data', 'admin.txt');
         this.graphPath = path.join(__dirname, 'data', 'graph.txt');
-        this.engineBinary = path.join(__dirname, 'src', 'reliefroute_engine.exe');
+        this.engineBinary = path.join(
+            ENGINE_DIR,
+            isWindows ? 'reliefroute_engine.exe' : 'reliefroute_engine'
+        );
     }
 
     start() {
@@ -21,8 +27,8 @@ class ReliefRouteEngine {
         this.isReady = false;
 
         if (!fs.existsSync(this.engineBinary)) {
-            console.error(`Engine Binary NOT FOUND at: ${this.engineBinary}`);
-            console.error('Please ensure the C++ engine is compiled.');
+            console.error(`Engine binary not found at: ${this.engineBinary}`);
+            console.error('Build the engine first: cd engine && make');
             return;
         }
 
@@ -55,7 +61,8 @@ class ReliefRouteEngine {
         if (this.engineProcess) {
             this.engineProcess.kill();
         }
-        await this.awaitReady(5000);
+        this.start();
+        return this.awaitReady(5000);
     }
 
     awaitReady(timeoutMs = 5000) {
@@ -85,13 +92,13 @@ class ReliefRouteEngine {
 
         this.isProcessing = true;
         const { cmdStr } = this.commandQueue[0];
-        
+
         if (this.engineProcess && this.engineProcess.stdin.writable) {
             this.engineProcess.stdin.write(cmdStr);
         } else {
             const { reject } = this.commandQueue.shift();
             this.isProcessing = false;
-            reject(new Error("Engine process not available"));
+            reject(new Error('Engine process not available'));
             this._processQueue();
         }
     }
@@ -106,7 +113,7 @@ class ReliefRouteEngine {
             const json = JSON.parse(response);
             resolve(json);
         } catch (e) {
-            resolve({ success: false, raw: response, error: "Invalid JSON from engine" });
+            resolve({ success: false, raw: response, error: 'Invalid JSON from engine' });
         }
 
         this._processQueue();
@@ -125,7 +132,6 @@ class ReliefRouteEngine {
             zone: cmdObj.zone,
             count: cmdObj.count
         };
-        // Filter out undefined values
         const cleanPayload = Object.fromEntries(
             Object.entries(payload).filter(([_, v]) => v !== undefined)
         );
@@ -134,3 +140,5 @@ class ReliefRouteEngine {
 }
 
 module.exports = new ReliefRouteEngine();
+module.exports.ENGINE_DIR = ENGINE_DIR;
+module.exports.SAMPLES_DIR = SAMPLES_DIR;

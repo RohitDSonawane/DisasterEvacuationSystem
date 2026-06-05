@@ -1,0 +1,5 @@
+# Scripted scenario for Maharashtra sample dataset
+AFFECTED Colaba 800
+AFFECTED Worli 1200
+EVACUATE Colaba 800
+EVACUATE Worli 600

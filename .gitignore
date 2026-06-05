@@ -1,12 +1,20 @@
+# Compiled binaries
 *.exe
 *.o
 *.out
+engine/reliefroute_engine
+engine/*.o
+
+# IDE
 .vscode/
+
+# Build artifacts
 build/
-ReliefRoute/docs/testing-workflow.md
+
+# ReliefRoute runtime data (seeded from engine/samples/ on first launch)
 ReliefRoute/backend/data/
 
-# ReliefRoute Next.js app ignores
+# ReliefRoute Next.js
 ReliefRoute/node_modules/
 ReliefRoute/.pnp*
 ReliefRoute/.yarn/
@@ -24,4 +32,6 @@ ReliefRoute/.env.*.local
 ReliefRoute/.vercel
 ReliefRoute/*.tsbuildinfo
 ReliefRoute/next-env.d.ts
-ReliefRoute/backend/data/
+
+# Legacy paths (removed in refactor)
+src/

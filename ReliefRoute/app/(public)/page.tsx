@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function LandingPage() {
     return (
@@ -30,14 +29,8 @@ export default function LandingPage() {
             <section className="relative pt-24 pb-32 text-white overflow-hidden min-h-[85vh] flex items-center">
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0 bg-slate-950">
-                    <Image 
-                        src="/hero-tactical.png" 
-                        alt="Background" 
-                        fill 
-                        className="object-cover object-center opacity-40 select-none pointer-events-none"
-                        quality={100}
-                        priority
-                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-primary-container/20" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-primary-container/15 via-transparent to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/20 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40"></div>
                 </div>
@@ -122,9 +115,7 @@ export default function LandingPage() {
             {/* CTA Section */}
             <section className="py-20 px-8">
                 <div className="max-w-7xl mx-auto rounded-3xl tactical-gradient p-12 md:p-20 text-center text-white relative shadow-2xl overflow-hidden group">
-                    <div className="absolute inset-0 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                        <Image src="/hero-tactical.png" alt="Overlay" fill className="object-cover" />
-                    </div>
+                    <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/30 via-transparent to-transparent" />
                     <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter">Ready to Save Lives?</h2>
                     <p className="text-xl mb-12 max-w-2xl mx-auto font-medium opacity-90">
                         Secure access for authorized emergency personnel. Logging in requires verified credentials.

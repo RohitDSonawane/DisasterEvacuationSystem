@@ -1,6 +1,0 @@
-# affected zone count
-AFFECTED  Zone_A   300
-AFFECTED  Zone_B   150
-# evacuate zone count
-EVACUATE  Zone_A   300
-EVACUATE  Zone_B   100

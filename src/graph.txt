@@ -1,5 +1,0 @@
-# node1 node2 weight
-ROAD  Zone_A    Shelter_1   5
-ROAD  Zone_A    Zone_B      3
-ROAD  Zone_B    Shelter_2   4
-ROAD  Zone_B    Shelter_1   8
