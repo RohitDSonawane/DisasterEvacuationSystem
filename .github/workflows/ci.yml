@@ -1,0 +1,24 @@
+name: Engine
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the engine
+        run: make -C engine
+
+      - name: Run the sample scenario
+        working-directory: engine
+        run: |
+          grep -v '^#' samples/disaster.txt > /tmp/scenario.txt
+          echo EXIT >> /tmp/scenario.txt
+          ./reliefroute_engine samples/admin.txt samples/graph.txt < /tmp/scenario.txt | tee /tmp/out.txt
+          grep -q "Wankhede_Stadium (Allocated: 800)" /tmp/out.txt
+          grep -q "BKC_Complex (Allocated: 600)" /tmp/out.txt
