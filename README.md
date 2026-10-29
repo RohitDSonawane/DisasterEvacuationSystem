@@ -1,28 +1,14 @@
 # Disaster Evacuation System
 
-![C++](https://img.shields.io/badge/Core-C%2B%2B17-blue)
-![Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra%20%7C%20Greedy-green)
-![Status](https://img.shields.io/badge/Status-Algorithm%20Prototype-yellow)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+[![Engine](https://github.com/RohitDSonawane/DisasterEvacuationSystem/actions/workflows/ci.yml/badge.svg)](https://github.com/RohitDSonawane/DisasterEvacuationSystem/actions/workflows/ci.yml)
+![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-An academic computer-science project that models disaster evacuation as a **graph optimization problem**: shortest-path routing (Dijkstra) plus **capacity-constrained shelter allocation** (greedy strategy).
+A C++ engine that treats disaster evacuation as a graph problem. It finds the shortest road route from a disaster zone to each relief center with Dijkstra's algorithm, then fills the nearest centers first with a greedy allocation that respects each center's capacity. It began as an academic project.
 
-> **Current focus:** C++ algorithm engine  
-> **Future vision:** Full operational dashboard for emergency coordinators
+The engine in `engine/` is the main part of the repository. `ReliefRoute/` is a Next.js dashboard prototype that drives the engine through a web page.
 
----
-
-## What's Inside
-
-| Component | Path | Status |
-|-----------|------|--------|
-| **Algorithm Engine** | [`engine/`](./engine/) | Primary artifact — CLI + JSON modes |
-| **ReliefRoute Dashboard** | [`ReliefRoute/`](./ReliefRoute/) | Prototype integration layer |
-| **Documentation** | [`docs/`](./docs/) | Algorithms, architecture, roadmap |
-
----
-
-## Quick Start (Engine)
+## Quick start
 
 ```bash
 cd engine
@@ -30,7 +16,7 @@ make
 make run
 ```
 
-Windows (without `make`):
+On Windows without `make`:
 
 ```powershell
 cd engine
@@ -38,75 +24,84 @@ g++ main.cpp AllocationModule.cpp GraphModule.cpp IOModule.cpp TreeModule.cpp Tr
 .\reliefroute_engine.exe samples\admin.txt samples\graph.txt
 ```
 
-**CLI commands:** `AFFECTED <zone> <count>`, `EVACUATE <zone> <count>`, `STATUS`, `SUMMARY`, `EXIT`
+The commands are `AFFECTED <zone> <count>`, `EVACUATE <zone> <count>`, `STATUS`, `SUMMARY` and `EXIT`.
 
----
+## Example
 
-## Optional: ReliefRoute Prototype Dashboard
+With the Maharashtra sample data, 20,000 affected people in Colaba are more than the nearest shelter can hold. Wankhede Stadium takes 15,000 and the rest go to BKC Complex, routed through Worli:
+
+```text
+> AFFECTED Colaba 20000
+OK: Updated population for Colaba
+> EVACUATE Colaba 20000
+--- Evacuation Plan for Colaba (20000 people) ---
+ Assignment [1]:
+  Shelter  : Wankhede_Stadium (Allocated: 15000)
+  Distance : 1 km
+  Route    : Colaba -> Wankhede_Stadium
+ Assignment [2]:
+  Shelter  : BKC_Complex (Allocated: 5000)
+  Distance : 12 km
+  Route    : Colaba -> Worli -> BKC_Complex
+> SUMMARY
+Name                    Occupancy   Capacity   Status
+Wankhede_Stadium        15000       15000      [FULL]
+BKC_Complex             5000        25000      [OK]
+...
+```
+
+## Algorithms
+
+1. An N-ary tree holds the administrative hierarchy and adds up population from the bottom.
+2. An adjacency list stores the road network, which is sparse.
+3. Dijkstra's algorithm computes shortest paths from the disaster zone to every shelter.
+4. A greedy allocation fills the nearest shelters first and sends the overflow to the next closest. This is simple and fast but it is not guaranteed to be globally optimal.
+
+Pseudocode and complexity are in [docs/ALGORITHMS.md](./docs/ALGORITHMS.md).
+
+## Sample data
+
+`engine/samples/` holds a Maharashtra scenario with the districts Mumbai, Pune and Thane, 8 zones and 7 relief centers. `disaster.txt` is a short scripted run that the CI job replays on every push.
+
+## ReliefRoute dashboard
+
+ReliefRoute is an integration prototype and is not production-ready. It starts the C++ engine as a subprocess and talks to it with JSON over stdin and stdout.
 
 ```bash
-# Terminal 1 — build engine first, then start API
+# Terminal 1: build the engine, then start the API
 cd engine && make
 cd ../ReliefRoute
 node backend/server.js
 
-# Terminal 2 — frontend
+# Terminal 2: start the frontend
 cd ReliefRoute
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Development login: `admin` / `admin123`.
-
-See [ReliefRoute/README.md](./ReliefRoute/README.md) for details.
-
----
-
-## Algorithms at a Glance
-
-1. **N-ary tree** — administrative hierarchy with population aggregation
-2. **Adjacency list** — sparse road network representation
-3. **Dijkstra** — shortest paths from disaster zone to all shelters
-4. **Greedy allocation** — fill nearest shelters first, overflow to next closest
-
-Full analysis: [docs/ALGORITHMS.md](./docs/ALGORITHMS.md)
-
----
-
-## Sample Scenario
-
-The committed `engine/samples/` dataset models a **Maharashtra** evacuation scenario with Mumbai, Pune, and Thane districts, 8 zones, and 7 relief centers.
-
----
+Open http://localhost:3000 and sign in with `admin` / `admin123`. These are development defaults. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `ReliefRoute/.env` before running it anywhere other than your own machine. More detail is in [ReliefRoute/README.md](./ReliefRoute/README.md).
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Algorithms](./docs/ALGORITHMS.md) | Problem definition, pseudocode, complexity |
-| [Architecture](./docs/ARCHITECTURE.md) | Three-tier system design |
-| [Workflow](./docs/WORKFLOW.md) | Disaster lifecycle phases |
-| [Data Formats](./docs/DATA_FORMATS.md) | `admin.txt` and `graph.txt` syntax |
-| [Roadmap](./docs/ROADMAP.md) | Current scope vs future vision |
+| Document | Contents |
+|----------|----------|
+| [Algorithms](./docs/ALGORITHMS.md) | Problem definition, pseudocode and complexity |
+| [Architecture](./docs/ARCHITECTURE.md) | The three-tier design |
+| [Workflow](./docs/WORKFLOW.md) | Phases of a disaster response |
+| [Data formats](./docs/DATA_FORMATS.md) | Syntax of `admin.txt` and `graph.txt` |
+| [Roadmap](./docs/ROADMAP.md) | Current scope and planned work |
 
----
-
-## Project Structure
+## Project layout
 
 ```
 DisasterEvacuationSystem/
-├── engine/                 # Canonical C++ algorithm core
-│   ├── samples/            # Committed test scenarios
-│   ├── Makefile
-│   └── README.md
-├── ReliefRoute/            # Next.js prototype dashboard
-│   └── backend/            # Express API + engine bridge
-├── docs/                   # Academic & architecture docs
+├── engine/          C++ algorithm core, Makefile and sample data
+├── ReliefRoute/     Next.js dashboard prototype
+│   └── backend/     Express API and engine bridge
+├── docs/            algorithm and architecture notes
 └── README.md
 ```
 
----
-
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE).
